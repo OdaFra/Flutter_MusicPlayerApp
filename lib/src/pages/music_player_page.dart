@@ -6,14 +6,40 @@ class MusicPlayerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
+        body: Stack(
       children: [
-        CustomAppBar(),
-        ImageDiscoDuracion(),
-        TituloPlay(),
-        Expanded(child: Lyrics())
+        Background(),
+        Column(
+          children: [
+            CustomAppBar(),
+            ImageDiscoDuracion(),
+            TituloPlay(),
+            const SizedBox(height: 20),
+            Expanded(child: Lyrics())
+          ],
+        ),
       ],
     ));
+  }
+}
+
+class Background extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    return Container(
+      width: double.infinity,
+      height: screenSize.height * 0.75,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(60),
+          gradient: const LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.center,
+              colors: [
+                Color(0xff33333e),
+                Color(0xff201e28),
+              ])),
+    );
   }
 }
 
@@ -38,7 +64,28 @@ class Lyrics extends StatelessWidget {
   }
 }
 
-class TituloPlay extends StatelessWidget {
+class TituloPlay extends StatefulWidget {
+  @override
+  State<TituloPlay> createState() => _TituloPlayState();
+}
+
+class _TituloPlayState extends State<TituloPlay>
+    with SingleTickerProviderStateMixin {
+  bool isPlaying = false;
+  late AnimationController playAnimation;
+  @override
+  void initState() {
+    playAnimation = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    playAnimation.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -58,12 +105,22 @@ class TituloPlay extends StatelessWidget {
           ),
           const Spacer(),
           FloatingActionButton(
-            elevation: 0,
-            highlightElevation: 0,
-            onPressed: () {},
-            backgroundColor: const Color(0xfff8cb51),
-            child: const Icon(Icons.play_arrow),
-          )
+              elevation: 0,
+              highlightElevation: 0,
+              onPressed: () {
+                if (isPlaying) {
+                  playAnimation.reverse();
+                  isPlaying = false;
+                } else {
+                  playAnimation.forward();
+                  isPlaying = true;
+                }
+              },
+              backgroundColor: const Color(0xfff8cb51),
+              child: AnimatedIcon(
+                icon: AnimatedIcons.play_pause,
+                progress: playAnimation,
+              ))
         ],
       ),
     );
